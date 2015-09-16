@@ -1,0 +1,49 @@
+group ''
+version '1.0-SNAPSHOT'
+buildDir = 'target'
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+configurations {
+	ajc
+	aspects
+	aspectCompile
+	provided
+	compile {
+		extendsFrom aspects
+		extendsFrom provided
+	}
+	compileGroovy
+	testCompile
+}
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+compileGroovy {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+
+	doLast {
+		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
+		ant.iajc(source: "1.8", target: "1.8", destDir: sourceSets.main.output.classesDir.absolutePath, maxmem: "512m", fork: "true",
+				, sourceRootCopyFilter: "**/.svn/*,**/*.java",
+				aspectPath: configurations.aspects.asPath,
+				inpath: 'target/classes',
+				classpath: "${configurations.compile.asPath};${configurations.aspectCompile.asPath}") {
+			sourceroots {
+				sourceSets.main.java.srcDirs.each {
+					pathelement(location: it.absolutePath)
+				}
+			}
+		}
+	}
+}
+
+dependencies {
+	ajc "org.aspectj:aspectjtools:1.8.5"
+	compile 'org.codehaus.groovy:groovy-all:2.+'
+}

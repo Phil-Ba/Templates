@@ -1,0 +1,32 @@
+group ''
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+apply plugin: 'groovy'
+
+mainClassName=''
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+jar {
+	manifest.attributes("Main-Class": "$mainClassName")
+}
+
+
+dependencies {
+}
+
+task fatJar(type: Jar) {
+	manifest {
+		attributes 'Main-Class': '$mainClassName'
+	}
+	baseName = project.name + '-all'
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	with jar
+}
